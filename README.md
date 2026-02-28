@@ -1,1 +1,1 @@
-# party-game
+# Party game
