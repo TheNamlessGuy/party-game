@@ -13,6 +13,7 @@ enum TurnStates {
   START_OF_TURN,
   ROLL_DICE,
   MOVE,
+  BATTLE_CHECK,
   MINIGAME_CHECK,
   END_OF_TURN,
 }
@@ -26,7 +27,7 @@ func _ready() -> void:
   tiles.push_back($PlusTile2)
   tiles.push_back($MinusTile2)
 
-  for node in [$Player1]:
+  for node in [$Player1, $Player2, $Player3]:
     player_nodes.push_back(node)
     current_player_tile.push_back(-1)
     player_currency_major.push_back(0)
@@ -43,6 +44,8 @@ func _process(delta: float) -> void:
     _state_roll_dice()
   elif current_turn_state == TurnStates.MOVE:
     _state_move(delta)
+  elif current_turn_state == TurnStates.BATTLE_CHECK:
+    _state_battle_check()
   elif current_turn_state == TurnStates.MINIGAME_CHECK:
     _state_minigame_check()
   elif current_turn_state == TurnStates.END_OF_TURN:
@@ -63,7 +66,7 @@ func _state_move(delta: float) -> void:
       var tile = tiles[current_player_tile[current_player_idx]]
       player_currency_minor[current_player_idx] += 1 if tile in [$PlusTile, $PlusTile2] else -1
       prints("Player", current_player_idx + 1, "minor currency changed to", player_currency_minor[current_player_idx])
-      current_turn_state = TurnStates.MINIGAME_CHECK
+      current_turn_state = TurnStates.BATTLE_CHECK
     else:
       # Move to the next tile
       remaining_step_count -= 1
@@ -73,6 +76,26 @@ func _state_move(delta: float) -> void:
       current_player_tile[current_player_idx] = (current_player_tile[current_player_idx] + 1) % len(tiles)
       player_nodes[current_player_idx].position.x = tiles[current_player_tile[current_player_idx]].position.x
       player_nodes[current_player_idx].position.z = tiles[current_player_tile[current_player_idx]].position.z
+
+func _state_battle_check() -> void:
+  current_turn_state = TurnStates.MINIGAME_CHECK # Set this here so it is this state when we get back from the battle game
+  var battle_between := []
+  for other_player_idx in range(len(player_nodes)):
+    if current_player_idx == other_player_idx:
+      battle_between.push_back(other_player_idx)
+      continue
+
+    if current_player_tile[current_player_idx] == current_player_tile[other_player_idx]:
+      battle_between.push_back(other_player_idx)
+
+  if len(battle_between) > 1:
+    var tmp := ""
+    for idx in battle_between:
+      if len(tmp) > 0: tmp += ", "
+      tmp += str(idx)
+    prints("Time for battle minigame between players", tmp)
+    # TODO: simulate minigame
+    prints("Wow nice play, whoever won!")
 
 func _state_minigame_check() -> void:
   current_turn_state = TurnStates.END_OF_TURN # Set this here so it is this state when we get back from the minigame

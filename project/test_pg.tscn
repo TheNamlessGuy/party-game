@@ -34,7 +34,25 @@ size = Vector3(1, 0.1, 1)
 material = SubResource("StandardMaterial3D_xbrrm")
 size = Vector3(1, 0.1, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1o4nd"]
+albedo_color = Color(0.22653553, 0.23590252, 1, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_oocy8"]
+material = SubResource("StandardMaterial3D_1o4nd")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oocy8"]
+albedo_color = Color(0.5681234, 0.0025187784, 0.8277316, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_b7lnr"]
+material = SubResource("StandardMaterial3D_oocy8")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b7lnr"]
+albedo_color = Color(0, 0.4325336, 0.6191616, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nhihw"]
+material = SubResource("StandardMaterial3D_b7lnr")
 size = Vector3(0.5, 0.5, 0.5)
 
 [node name="TestPG" type="Node3D" unique_id=2052045607]
@@ -63,10 +81,6 @@ mesh = SubResource("BoxMesh_1o4nd")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -4.5)
 mesh = SubResource("BoxMesh_v565n")
 
-[node name="Player1" type="MeshInstance3D" parent="." unique_id=483454460]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.06684, 0.40406793, 0)
-mesh = SubResource("BoxMesh_oocy8")
-
 [node name="Camera3D" type="Camera3D" parent="." unique_id=589811547]
 transform = Transform3D(0.71272415, -0.57458967, 0.402332, 0, 0.57357645, 0.81915206, -0.70144445, -0.58382946, 0.4088018, 5.48219, 5.354865, 4.154644)
 
@@ -74,3 +88,15 @@ transform = Transform3D(0.71272415, -0.57458967, 0.402332, 0, 0.57357645, 0.8191
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2216425, 0)
 light_energy = 50.0
 omni_range = 25.0
+
+[node name="Player1" type="MeshInstance3D" parent="." unique_id=483454460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.06684, 0.40406793, 0.68332976)
+mesh = SubResource("BoxMesh_oocy8")
+
+[node name="Player2" type="MeshInstance3D" parent="." unique_id=1804724848]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.0661907, 0.39914554, 0.0516932)
+mesh = SubResource("BoxMesh_b7lnr")
+
+[node name="Player3" type="MeshInstance3D" parent="." unique_id=1344903592]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.0706553, 0.4033752, -0.57515955)
+mesh = SubResource("BoxMesh_nhihw")
