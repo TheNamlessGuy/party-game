@@ -14,6 +14,11 @@ config/name="Party game"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+EventBus="*uid://h48f3cgs57ew"
+Global="*uid://bfww47rllqp2o"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
