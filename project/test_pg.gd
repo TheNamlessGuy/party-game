@@ -21,6 +21,11 @@ enum TurnStates {
 var remaining_step_count = 0
 var step_timer = 0
 
+var main_bus = null
+
+func get_main_eventbus(bus: String) -> void:
+  main_bus = EventBus.get_bus(bus)
+
 func _ready() -> void:
   tiles.push_back($PlusTile)
   tiles.push_back($MinusTile)
@@ -94,15 +99,13 @@ func _state_battle_check() -> void:
       if len(tmp) > 0: tmp += ", "
       tmp += str(idx)
     prints("Time for battle minigame between players", tmp)
-    # TODO: simulate minigame
-    prints("Wow nice play, whoever won!")
+    main_bus.send({'action': 'start_battle_minigame'})
 
 func _state_minigame_check() -> void:
   current_turn_state = TurnStates.END_OF_TURN # Set this here so it is this state when we get back from the minigame
   if current_player_idx == len(player_nodes) - 1:
     prints("Time for minigame")
-    # TODO: simulate minigame
-    prints("Wow nice play, whoever won!")
+    main_bus.send({'action': 'start_minigame'})
 
 func _state_end_of_turn() -> void:
   current_player_idx = (current_player_idx + 1) % len(player_nodes)
