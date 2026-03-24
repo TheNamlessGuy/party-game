@@ -32,3 +32,6 @@ class Bus:
 
   func poll(last_read_idx: int) -> Array:
     return _messages.slice(last_read_idx)
+
+  func len() -> int:
+    return len(_messages)
