@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 extends Node
 
 # Note: This only exits on the next frame. Seems this is the best global exit Godot can do
