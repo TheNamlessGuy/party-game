@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://ddsbmc57djwsc"]
+
+[ext_resource type="Script" uid="uid://gg2s1rja8bew" path="res://scenes/examples/fade_example.gd" id="1_sok1u"]
+[ext_resource type="Script" uid="uid://dv1q0wocxarhg" path="res://scripts/color_fader.gd" id="2_s3uc8"]
+
+[node name="FadeExample" type="Node2D" unique_id=1444013503]
+script = ExtResource("1_sok1u")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1571787484]
+
+[node name="ColorFader" type="ColorRect" parent="." unique_id=1774003743]
+z_index = 100
+offset_right = 1151.0
+offset_bottom = 646.0
+color = Color(0, 0, 0, 1)
+script = ExtResource("2_s3uc8")
+fade_time = 1.0
+metadata/_custom_type_script = "uid://dv1q0wocxarhg"
+
+[node name="Label" type="Label" parent="." unique_id=963508803]
+offset_right = 1154.0
+offset_bottom = 649.0
+text = "(: HELLO :)"
+horizontal_alignment = 1
+vertical_alignment = 1
