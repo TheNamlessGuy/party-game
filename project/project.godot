@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 EventBus="*uid://h48f3cgs57ew"
 Global="*uid://bfww47rllqp2o"
+LuaPlugins="*uid://dpwbi8jqhutrh"
 
 [physics]
 
