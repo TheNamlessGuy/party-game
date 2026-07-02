@@ -9,6 +9,7 @@ var last_bus_idx = 0
 var in_minigame = false
 
 func _ready() -> void:
+  var resource_tree = Resources.create_resource_tree()
   bus = EventBus.construct_bus("test_pg")
 
   pg_node = pg_scene.instantiate()
