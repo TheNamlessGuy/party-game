@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://uknpqb8xam5o"]
+
+[ext_resource type="Script" uid="uid://6n3bvl7gwgj4" path="res://scripts/minigame_manager.gd" id="1_0v7rs"]
+[ext_resource type="Script" uid="uid://cbwq546b5ee32" path="res://scripts/main_manager.gd" id="1_kfbdx"]
+[ext_resource type="Script" path="res://scripts/color_fader.gd" id="2_kjggv"]
+[ext_resource type="Script" uid="uid://cgd5vevy54kay" path="res://scripts/party_game_manager.gd" id="2_u57kv"]
+
+[node name="NewMain" type="Node2D" unique_id=802795495]
+script = ExtResource("1_kfbdx")
+
+[node name="ColorFader" type="ColorRect" parent="." unique_id=32741964]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0, 0, 0, 1)
+script = ExtResource("2_kjggv")
+
+[node name="PartyGameManager" type="Node" parent="." unique_id=1346829031]
+script = ExtResource("2_u57kv")
+metadata/_custom_type_script = "uid://cgd5vevy54kay"
+
+[node name="MinigameManager" type="Node" parent="." unique_id=113621355]
+script = ExtResource("1_0v7rs")
+metadata/_custom_type_script = "uid://6n3bvl7gwgj4"

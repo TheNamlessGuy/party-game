@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://dhs7g2fbvvfsu"]
+
+[ext_resource type="Script" uid="uid://ckgjoicgo1340" path="res://scenes/examples/dummy_party_game.gd" id="1_agugb"]
+[ext_resource type="Script" uid="uid://djvn7jrcnacbj" path="res://scenes/examples/spinner.gd" id="2_i6tmh"]
+
+[node name="DummyPartygame" type="Node3D" unique_id=1432316491]
+script = ExtResource("1_agugb")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1100214351]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=1893056073]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1843487, -5.079374)
+script = ExtResource("2_i6tmh")
+
+[node name="Label3D" type="Label3D" parent="CSGBox3D" unique_id=1454174167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5142541)
+pixel_size = 0.01
+text = "1
+"
+
+[node name="Label3D2" type="Label3D" parent="CSGBox3D" unique_id=390589620]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.5042223, 0, -0.0069856644)
+pixel_size = 0.01
+text = "2
+
+"
+
+[node name="Label3D3" type="Label3D" parent="CSGBox3D" unique_id=838448783]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -0.04017809, 0, -0.507184)
+pixel_size = 0.01
+text = "3
+
+
+"
+
+[node name="Label3D4" type="Label3D" parent="CSGBox3D" unique_id=1410070318]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -0.50060177, 0, 0.016962528)
+pixel_size = 0.01
+text = "4
+
+
+
+"
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1888203364]
+transform = Transform3D(0.95514405, 0.14836608, -0.25629532, 0, 0.8654489, 0.50099725, 0.2961415, -0.47852454, 0.8266284, -3.886745, 2.2976034, 0)
