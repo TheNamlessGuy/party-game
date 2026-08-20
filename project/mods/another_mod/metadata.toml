@@ -1,0 +1,4 @@
+[general]
+name = "another_mod"
+author = "Benk"
+dependencies = []
