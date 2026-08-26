@@ -50,13 +50,11 @@ static func load_all():
   var metadata = _load_all_metadata()
   if metadata is LoadError:
     # Global.fatal_error(["Could not load mod metadata"])
-    print("error luln")
     return
 
   var load_queue = _resolve_load_order(metadata)
   if load_queue is LoadError:
     # Global.fatal_error(["Could not resolve mod load order"])
-    print("error luln")
     return
 
   for mod in load_queue:
