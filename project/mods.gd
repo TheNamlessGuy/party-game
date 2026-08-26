@@ -35,26 +35,41 @@ class LoadError:
     self.reason = reason
     self.target = target
 
+  func _to_string():
+    match self.reason:
+      Reason.NO_METADATA:
+        return "Error when loading mod %s (no metadata file found)" % self.target
+      Reason.BAD_METADATA:
+        return "Error when loading mod %s (invalid metadata)" % self.target
+      Reason.DEPENDENCIES_NOT_AVAILABLE:
+        return "Error when loading mod %s (dependencies not available)" % self.target
+      Reason.DEPENDENCY_RESOLUTION_FAILURE:
+        return "Error when loading mods (could not resolve mod load order)"
+
 static func load_all():
   var metadata = _load_all_metadata()
   if metadata is LoadError:
-    Global.fatal_error(["Could not load mod metadata"])
+    # Global.fatal_error(["Could not load mod metadata"])
+    print("error luln")
+    return
 
   var load_queue = _resolve_load_order(metadata)
   if load_queue is LoadError:
-    Global.fatal_error(["Could not resolve mod load order"])
+    # Global.fatal_error(["Could not resolve mod load order"])
+    print("error luln")
+    return
 
   for mod in load_queue:
     _load_mod(mod)
 
 static func _load_all_metadata():
-  var mods_path = "./mods/"
+  var mods_path = "res://mods/"
 
   var metadata: Array[ModMetadata] = []
 
   var mod_dirs = DirAccess.open(mods_path).get_directories()
   for mod_dir in mod_dirs:
-    var metadata_path = mods_path + mod_dir + "/metadata.toml"
+    var metadata_path = mods_path.path_join(mod_dir).path_join("metadata.toml")
 
     if not FileAccess.file_exists(metadata_path):
       return LoadError.new(LoadError.Reason.NO_METADATA, mod_dir)
@@ -110,7 +125,7 @@ static func _resolve_load_order(metadata):
       for dep in mod.dependencies:
         if dep not in resolved:
           # The dependency could not be found
-          return LoadError.new(LoadError.Reason.DEPENDENCIES_NOT_AVAILABLE, "")
+          return LoadError.new(LoadError.Reason.DEPENDENCIES_NOT_AVAILABLE, mod.name)
         if not resolved[dep]:
           # If a dependency has not been added to the load queue, we cannot yet add this mod
           all_deps_loaded = false

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://6n3bvl7gwgj4" path="res://scripts/minigame_manager.gd" id="1_0v7rs"]
 [ext_resource type="Script" uid="uid://cbwq546b5ee32" path="res://scripts/main_manager.gd" id="1_kfbdx"]
-[ext_resource type="Script" path="res://scripts/color_fader.gd" id="2_kjggv"]
+[ext_resource type="Script" uid="uid://dv1q0wocxarhg" path="res://scripts/color_fader.gd" id="2_kjggv"]
 [ext_resource type="Script" uid="uid://cgd5vevy54kay" path="res://scripts/party_game_manager.gd" id="2_u57kv"]
 
 [node name="NewMain" type="Node2D" unique_id=802795495]
