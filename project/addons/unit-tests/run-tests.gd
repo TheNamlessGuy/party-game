@@ -32,7 +32,7 @@ func _init() -> void:
 
 func _ready() -> void:
   prints("READY")
-  prints('Global', ClassDB.class_exists('Global'))
+  prints('Global', root.has_node('Global'))
   prints('LuaState', ClassDB.class_exists('LuaState'))
   _teardown(0)
 
