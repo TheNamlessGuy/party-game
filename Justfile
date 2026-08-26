@@ -67,6 +67,7 @@ copy-env:
 [doc("Runs all available tests")]
 [script('bash')]
 run-tests:
+  #"${GODOT_BINARY}" --headless --path "./project/" --import
   "${GODOT_BINARY}" --path "./project/" --headless --script "addons/unit-tests/run-tests.gd" -- --dir "tests"
 
 [group("Tests")]

@@ -23,7 +23,3 @@ func run_plugin(path: String):
   _lua_state.do_file(path)
   var new_obj = _lua_state.globals["lua_api"].invoke(Example.new(10, 20))
   print("x: ", new_obj.x, ", y: ", new_obj.y)
-
-# Usage example
-func _ready() -> void:
-  run_plugin("res://example_plugin.lua")
