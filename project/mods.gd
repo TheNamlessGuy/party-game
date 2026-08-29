@@ -4,14 +4,18 @@ extends Node
 # TODO: Add support for mod versioning
 
 class ModMetadata:
+  var id: String
   var name: String
   var author: String
   var dependencies: Array
+  var tags: Array
 
-  func _init(name: String, author: String, dependencies: Array):
+  func _init(id: String, name: String, author: String, dependencies: Array, tags: Array):
+    self.id = id
     self.name = name
     self.author = author
     self.dependencies = dependencies
+    self.tags = tags
 
 class LoadError:
   enum Reason {
@@ -26,6 +30,9 @@ class LoadError:
 
     # Dependency load order could not be resolved
     DEPENDENCY_RESOLUTION_FAILURE,
+
+    # Several mods provide the same tag
+    DUPLICATE_TAGS,
   }
 
   var reason: Reason
@@ -45,6 +52,8 @@ class LoadError:
         return "Error when loading mod %s (dependencies not available)" % self.target
       Reason.DEPENDENCY_RESOLUTION_FAILURE:
         return "Error when loading mods (could not resolve mod load order)"
+      Reason.DUPLICATE_TAGS:
+        return "Error when loading mod %s (tag already provided)" % self.target
 
 static func load_all():
   var metadata = _load_all_metadata()
@@ -67,7 +76,7 @@ static func _load_all_metadata():
 
   var mod_dirs = DirAccess.open(mods_path).get_directories()
   for mod_dir in mod_dirs:
-    var metadata_path = mods_path.path_join(mod_dir).path_join("metadata.toml")
+    var metadata_path = mods_path.path_join(mod_dir).path_join("metadata.ini")
 
     if not FileAccess.file_exists(metadata_path):
       return LoadError.new(LoadError.Reason.NO_METADATA, mod_dir)
@@ -80,14 +89,17 @@ static func _load_all_metadata():
 
   return metadata
 
-# TODO: Use third-party .toml parser instead?
 static func _load_metadata(path):
   var cfg = ConfigFile.new()
   cfg.load(path)
 
+  if not cfg.has_section_key("general", "id"):
+    return LoadError.new(LoadError.Reason.BAD_METADATA, path)
+  var id = cfg.get_value("general", "id").to_lower()
+
   if not cfg.has_section_key("general", "name"):
     return LoadError.new(LoadError.Reason.BAD_METADATA, path)
-  var name = cfg.get_value("general", "name").to_lower()
+  var name = cfg.get_value("general", "name")
 
   if not cfg.has_section_key("general", "author"):
     return LoadError.new(LoadError.Reason.BAD_METADATA, path)
@@ -98,50 +110,68 @@ static func _load_metadata(path):
     return LoadError.new(LoadError.Reason.BAD_METADATA, path)
   dependencies = dependencies.map(func(x): return x.to_lower())
 
-  return ModMetadata.new(name, author, dependencies)
+  var tags: Array = cfg.get_value("general", "tags", [])
+  if len(tags) == 0:
+    return LoadError.new(LoadError.Reason.BAD_METADATA, path)
+  if not dependencies.all(func(x): return x is String):
+    return LoadError.new(LoadError.Reason.BAD_METADATA, path)
+  tags = tags.map(func(x): return x.to_lower())
+
+  return ModMetadata.new(id, name, author, dependencies, tags)
 
 static func _resolve_load_order(metadata):
-  var remaining_mods = metadata.duplicate()
-
   # The order in which mods should be loaded
   var load_queue = []
 
-  # Keep track of which mods have been added to the load queue
-  var resolved = {}
-  for mod in remaining_mods:
-    resolved[mod.name] = false
+  # Initialize a dictionary for keeping track of which mod tags have
+  # been added to the load queue. While at it, also validate that mods
+  # are not providing duplicate tags.
+  var tag_loaded = {}
+  for mod in metadata:
+    for tag in mod.tags:
+      if tag in tag_loaded:
+        return LoadError.new(LoadError.Reason.DUPLICATE_TAGS, mod.name)
+      tag_loaded[tag] = false
+
+  # Verify that mod dependencies are available
+  for mod in metadata:
+    for dep in mod.dependencies:
+      if dep not in tag_loaded:
+        return LoadError.new(LoadError.Reason.DEPENDENCIES_NOT_AVAILABLE, mod.name)
 
   # Add mods to the load queue one at a time
+  var remaining_mods = metadata.duplicate()
   while len(remaining_mods) > 0:
-    var successfully_loaded = false
-
-    for i in range(len(remaining_mods)):
-      var mod = remaining_mods[i]
-
-      # Check if all dependencies of this mod has been added to the load queue
-      var all_deps_loaded = true
-      for dep in mod.dependencies:
-        if dep not in resolved:
-          # The dependency could not be found
-          return LoadError.new(LoadError.Reason.DEPENDENCIES_NOT_AVAILABLE, mod.name)
-        if not resolved[dep]:
-          # If a dependency has not been added to the load queue, we cannot yet add this mod
-          all_deps_loaded = false
-          break
-
-      # If all dependencies checks out, add this mod to the load queue
-      if all_deps_loaded:
-        load_queue.append(mod)
-        resolved[mod.name] = true
-        remaining_mods.remove_at(i)
-        successfully_loaded = true
-        break
-
-    # If no mod could be added to the load queue, something went wrong (circular dependencies, for example)
-    if not successfully_loaded:
+    var mod_to_load = _find_loadable_mod(remaining_mods, tag_loaded)
+    if mod_to_load == null:
+      # None of the remaining mods could be loaded.
       return LoadError.new(LoadError.Reason.DEPENDENCY_RESOLUTION_FAILURE, "")
 
+    var mod = remaining_mods[mod_to_load]
+    remaining_mods.remove_at(mod_to_load)
+
+    load_queue.append(mod)
+    for tag in mod.tags:
+      tag_loaded[tag] = true
+
   return load_queue
+
+static func _find_loadable_mod(mods, tag_loaded):
+  for i in range(len(mods)):
+    var mod = mods[i]
+
+    # If the mod has at least one dependency that has not been loaded
+    # yet, the mod is not loadable.
+    var all_deps_loaded = true
+    for dep in mod.dependencies:
+      if not tag_loaded[dep]:
+        all_deps_loaded = false
+        break
+
+    if all_deps_loaded:
+      return i
+
+  return null
 
 static func _load_mod(metadata: ModMetadata):
   # TODO: Load the mod

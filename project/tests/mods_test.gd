@@ -9,8 +9,11 @@ func assertModLoadOrder(actual, expected):
   for i in range(len(actual)):
     assertEquals(actual[i], expected[i])
 
+func create_mod(id: String, deps: Array):
+  return Mods.ModMetadata.new(id, id, "author", deps, [id])
+
 func test_ResolveLoadOrder_SuccessSingle() -> void:
-  var mod_a = Mods.ModMetadata.new("A", "author", [])
+  var mod_a = create_mod("a", [])
 
   var input = [
     mod_a,
@@ -23,11 +26,11 @@ func test_ResolveLoadOrder_SuccessSingle() -> void:
   assertModLoadOrder(Mods._resolve_load_order(input), expected_output)
 
 func test_ResolveLoadOrder_SuccessMulti() -> void:
-  var mod_a = Mods.ModMetadata.new("A", "author", [])
-  var mod_b = Mods.ModMetadata.new("B", "author", ["A"])
-  var mod_c = Mods.ModMetadata.new("C", "author", ["A"])
-  var mod_d = Mods.ModMetadata.new("D", "author", ["B", "C"])
-  var mod_e = Mods.ModMetadata.new("E", "author", ["C", "D"])
+  var mod_a = create_mod("a", [])
+  var mod_b = create_mod("b", ["a"])
+  var mod_c = create_mod("c", ["a"])
+  var mod_d = create_mod("d", ["b", "c"])
+  var mod_e = create_mod("e", ["c", "d"])
 
   var input = [
     mod_d,
@@ -47,9 +50,30 @@ func test_ResolveLoadOrder_SuccessMulti() -> void:
 
   assertModLoadOrder(Mods._resolve_load_order(input), expected_output)
 
+func test_ResolveLoadOrder_SuccessTags() -> void:
+  var mod_a = create_mod("a", [])
+  mod_a.tags = ["tag_1", "tag_2"]
+  var mod_b = create_mod("b", ["tag_2"])
+  mod_b.tags = ["tag_3", "tag_4"]
+  var mod_c = create_mod("c", ["tag_3"])
+
+  var input = [
+    mod_c,
+    mod_b,
+    mod_a
+  ]
+
+  var expected_output = [
+    mod_a,
+    mod_b,
+    mod_c
+  ]
+
+  assertModLoadOrder(Mods._resolve_load_order(input), expected_output)
+
 func test_ResolveLoadOrder_FailMissingDependency() -> void:
-  var mod_a = Mods.ModMetadata.new("A", "author", [])
-  var mod_b = Mods.ModMetadata.new("B", "author", ["C"])
+  var mod_a = create_mod("a", [])
+  var mod_b = create_mod("b", ["c"])
 
   var input = [
     mod_a,
@@ -61,10 +85,10 @@ func test_ResolveLoadOrder_FailMissingDependency() -> void:
   assertEquals(output.reason, Mods.LoadError.Reason.DEPENDENCIES_NOT_AVAILABLE)
 
 func test_ResolveLoadOrder_FailCircularDependency() -> void:
-  var mod_a = Mods.ModMetadata.new("A", "author", [])
-  var mod_b = Mods.ModMetadata.new("B", "author", ["A", "D"])
-  var mod_c = Mods.ModMetadata.new("C", "author", ["B"])
-  var mod_d = Mods.ModMetadata.new("D", "author", ["C"])
+  var mod_a = create_mod("a", [])
+  var mod_b = create_mod("b", ["a", "d"])
+  var mod_c = create_mod("c", ["b"])
+  var mod_d = create_mod("d", ["c"])
 
   var input = [
     mod_a,
@@ -76,3 +100,18 @@ func test_ResolveLoadOrder_FailCircularDependency() -> void:
   var output = Mods._resolve_load_order(input)
   assertTrue(output is Mods.LoadError)
   assertEquals(output.reason, Mods.LoadError.Reason.DEPENDENCY_RESOLUTION_FAILURE)
+
+func test_ResolveLoadOrder_FailDuplicateTags() -> void:
+  var mod_a = create_mod("a", [])
+  mod_a.tags = ["the_tag"]
+  var mod_b = create_mod("b", [])
+  mod_b.tags = ["the_tag"]
+
+  var input = [
+    mod_a,
+    mod_b
+  ]
+
+  var output = Mods._resolve_load_order(input)
+  assertTrue(output is Mods.LoadError)
+  assertEquals(output.reason, Mods.LoadError.Reason.DUPLICATE_TAGS)
