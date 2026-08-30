@@ -16,6 +16,7 @@ func _ready() -> void:
     for testcase in test['cases']:
       prints("Running", test['class']['class'] + '::' + testcase['method']['name'])
       Callable(instance, testcase['method']['name']).call()
+    root.remove_child(instance)
     instance.queue_free()
 
   _teardown(0)
