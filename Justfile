@@ -3,7 +3,14 @@ set dotenv-load
 # START: Setup
 [group("Setup")]
 [doc("Does all initial setup")]
-initial-setup: copy-env install-dependencies
+initial-setup: copy-env install-dependencies cache-setup
+
+[group("Setup")]
+[doc("Sets up caches for the repository")]
+[script('bash')]
+cache-setup:
+  set -euo pipefail
+  "${GODOT_BINARY}" --headless --path "./project/" --import # This should generate ./project/.godot/extension_list.cfg, which is needed for unit tests (and probably other stuff)
 
 [group("Setup")]
 [doc("Installs all dependencies for you")]

@@ -1,39 +1,23 @@
 extends SceneTree
 
 func _init() -> void:
-  prints("INIT")
   _ready.call_deferred()
-  # var args = _parse_args()
-  # if args == null:
-  #   _teardown(0)
-  #   return
-
-  # var err = _load_addons()
-  # if err != null:
-  #   prints("Couldn't load addons:", err)
-  #   _teardown(1)
-  #   return
-
-  # err = _load_global_scripts()
-  # if err != null:
-  #   prints("Couldn't load global scripts:", err)
-  #   _teardown(1)
-  #   return
-
-  # var tests = _get_tests(args)
-
-  # for test in tests:
-  #   var instance = test['loaded_class'].new()
-  #   for testcase in test['cases']:
-  #     prints("Running", test['class']['class'] + '::' + testcase['method']['name'])
-  #     Callable(instance, testcase['method']['name']).call()
-
-  # _teardown(0)
 
 func _ready() -> void:
-  prints("READY")
-  prints('Global', root.has_node('Global'))
-  prints('LuaState', ClassDB.class_exists('LuaState'))
+  var args = _parse_args()
+  if args == null:
+    _teardown(0)
+    return
+
+  var tests = _get_tests(args)
+  for test in tests:
+    var instance = test['loaded_class'].new()
+    root.add_child(instance)
+    for testcase in test['cases']:
+      prints("Running", test['class']['class'] + '::' + testcase['method']['name'])
+      Callable(instance, testcase['method']['name']).call()
+    instance.queue_free()
+
   _teardown(0)
 
 func _parse_args():
@@ -112,52 +96,5 @@ func _method_matches_filters(clazz, method, filters) -> bool:
 
   return false
 
-func _load_global_scripts():
-  prints("Loading global scripts...")
-  var projectfile := ConfigFile.new()
-  var err = projectfile.load("res://project.godot")
-  if err != OK:
-    return err
-
-  var autoloads := projectfile.get_section_keys("autoload")
-  for autoload in autoloads:
-    var uid := projectfile.get_value("autoload", autoload)
-    uid = uid.trim_prefix("*")
-
-    var actual_uid = ResourceUID.text_to_id(uid)
-    if actual_uid == ResourceUID.INVALID_ID:
-      return ''.join(["Invalid UID for ", autoload, ": ", uid])
-
-    var path := ResourceUID.get_id_path(actual_uid)
-    if path.is_empty():
-      return ''.join(["No path found for ", autoload, ": ", uid, " ::: ", actual_uid])
-
-    var script = load(path)
-    var instance = script.new()
-    instance.name = autoload
-    root.add_child(instance)
-
-  return null
-
-var _loaded_addons: Array[String] = []
-func _load_addons():
-  prints("Loading addons...")
-  var paths := ["res://addons/lua-gdextension/luagdextension.gdextension"] # TODO: Dynamic discovery
-  for path in paths:
-    if GDExtensionManager.is_extension_loaded(path):
-      continue
-
-    var status := GDExtensionManager.load_extension(path)
-    if status != GDExtensionManager.LoadStatus.LOAD_STATUS_OK:
-      return ''.join(["Failed to load extension '", path, "'. Status: ", status])
-
-    _loaded_addons.push_back(path)
-
-  prints("", "", len(_loaded_addons), "addon(s) loaded")
-  return null
-
 func _teardown(exitcode: int) -> void:
-  for addon in _loaded_addons:
-    GDExtensionManager.unload_extension(addon)
-
   quit(exitcode)
