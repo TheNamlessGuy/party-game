@@ -69,7 +69,7 @@ static func load_all():
   for mod in load_queue:
     _load_mod(mod)
 
-static func _load_all_metadata():
+static func _load_all_metadata() -> Variant:
   var mods_path = "res://mods/"
 
   var metadata: Array[ModMetadata] = []
@@ -89,7 +89,7 @@ static func _load_all_metadata():
 
   return metadata
 
-static func _load_metadata(path):
+static func _load_metadata(path: String) -> Variant:
   var cfg = ConfigFile.new()
   cfg.load(path)
 
@@ -119,7 +119,7 @@ static func _load_metadata(path):
 
   return ModMetadata.new(id, name, author, dependencies, tags)
 
-static func _resolve_load_order(metadata):
+static func _resolve_load_order(metadata: Array) -> Variant:
   # The order in which mods should be loaded
   var load_queue = []
 
@@ -143,7 +143,7 @@ static func _resolve_load_order(metadata):
   var remaining_mods = metadata.duplicate()
   while len(remaining_mods) > 0:
     var mod_to_load = _find_loadable_mod(remaining_mods, tag_loaded)
-    if mod_to_load == null:
+    if mod_to_load == -1:
       # None of the remaining mods could be loaded.
       return LoadError.new(LoadError.Reason.DEPENDENCY_RESOLUTION_FAILURE, "")
 
@@ -156,7 +156,7 @@ static func _resolve_load_order(metadata):
 
   return load_queue
 
-static func _find_loadable_mod(mods, tag_loaded):
+static func _find_loadable_mod(mods: Array, tag_loaded: Dictionary) -> int:
   for i in range(len(mods)):
     var mod = mods[i]
 
@@ -171,7 +171,7 @@ static func _find_loadable_mod(mods, tag_loaded):
     if all_deps_loaded:
       return i
 
-  return null
+  return -1
 
 static func _load_mod(metadata: ModMetadata):
   # TODO: Load the mod
