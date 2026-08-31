@@ -17,6 +17,13 @@ class ModMetadata:
     self.dependencies = dependencies
     self.tags = tags
 
+  # Return the list of tags in "mod:tag" name format
+  func complete_tags() -> Array:
+    var tags = []
+    for tag in self.tags:
+      tags.append(self.name + ":" + tag)
+    return tags
+
 class LoadError:
   enum Reason {
     # No metadata file was found
@@ -31,8 +38,8 @@ class LoadError:
     # Dependency load order could not be resolved
     DEPENDENCY_RESOLUTION_FAILURE,
 
-    # Several mods provide the same tag
-    DUPLICATE_TAGS,
+    # Several mods use the same id
+    DUPLICATE_MODS,
   }
 
   var reason: Reason
@@ -52,8 +59,8 @@ class LoadError:
         return "Error when loading mod %s (dependencies not available)" % self.target
       Reason.DEPENDENCY_RESOLUTION_FAILURE:
         return "Error when loading mods (could not resolve mod load order)"
-      Reason.DUPLICATE_TAGS:
-        return "Error when loading mod %s (tag already provided)" % self.target
+      Reason.DUPLICATE_MODS:
+        return "Error when loading mod %s (mod with same id already exists)" % self.target
 
 static func load_all():
   var metadata = _load_all_metadata()
@@ -123,14 +130,17 @@ static func _resolve_load_order(metadata: Array) -> Variant:
   # The order in which mods should be loaded
   var load_queue = []
 
+  # Verify that no two mods use the same id.
+  for i in range(len(metadata)):
+    for j in range(i+1, len(metadata)):
+      if metadata[i].name == metadata[j].name:
+        return LoadError.new(LoadError.Reason.DUPLICATE_MODS, metadata[i].name)
+
   # Initialize a dictionary for keeping track of which mod tags have
-  # been added to the load queue. While at it, also validate that mods
-  # are not providing duplicate tags.
+  # been added to the load queue.
   var tag_loaded = {}
   for mod in metadata:
-    for tag in mod.tags:
-      if tag in tag_loaded:
-        return LoadError.new(LoadError.Reason.DUPLICATE_TAGS, mod.name)
+    for tag in mod.complete_tags():
       tag_loaded[tag] = false
 
   # Verify that mod dependencies are available
@@ -151,7 +161,7 @@ static func _resolve_load_order(metadata: Array) -> Variant:
     remaining_mods.remove_at(mod_to_load)
 
     load_queue.append(mod)
-    for tag in mod.tags:
+    for tag in mod.complete_tags():
       tag_loaded[tag] = true
 
   return load_queue

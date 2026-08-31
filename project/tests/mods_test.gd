@@ -27,10 +27,10 @@ func test_ResolveLoadOrder_SuccessSingle() -> void:
 
 func test_ResolveLoadOrder_SuccessMulti() -> void:
   var mod_a = create_mod("a", [])
-  var mod_b = create_mod("b", ["a"])
-  var mod_c = create_mod("c", ["a"])
-  var mod_d = create_mod("d", ["b", "c"])
-  var mod_e = create_mod("e", ["c", "d"])
+  var mod_b = create_mod("b", ["a:a"])
+  var mod_c = create_mod("c", ["a:a"])
+  var mod_d = create_mod("d", ["b:b", "c:c"])
+  var mod_e = create_mod("e", ["c:c", "d:d"])
 
   var input = [
     mod_d,
@@ -53,9 +53,9 @@ func test_ResolveLoadOrder_SuccessMulti() -> void:
 func test_ResolveLoadOrder_SuccessTags() -> void:
   var mod_a = create_mod("a", [])
   mod_a.tags = ["tag_1", "tag_2"]
-  var mod_b = create_mod("b", ["tag_2"])
+  var mod_b = create_mod("b", ["a:tag_2"])
   mod_b.tags = ["tag_3", "tag_4"]
-  var mod_c = create_mod("c", ["tag_3"])
+  var mod_c = create_mod("c", ["b:tag_3"])
 
   var input = [
     mod_c,
@@ -73,7 +73,7 @@ func test_ResolveLoadOrder_SuccessTags() -> void:
 
 func test_ResolveLoadOrder_FailMissingDependency() -> void:
   var mod_a = create_mod("a", [])
-  var mod_b = create_mod("b", ["c"])
+  var mod_b = create_mod("b", ["c:c"])
 
   var input = [
     mod_a,
@@ -86,9 +86,9 @@ func test_ResolveLoadOrder_FailMissingDependency() -> void:
 
 func test_ResolveLoadOrder_FailCircularDependency() -> void:
   var mod_a = create_mod("a", [])
-  var mod_b = create_mod("b", ["a", "d"])
-  var mod_c = create_mod("c", ["b"])
-  var mod_d = create_mod("d", ["c"])
+  var mod_b = create_mod("b", ["a:a", "d:d"])
+  var mod_c = create_mod("c", ["b:b"])
+  var mod_d = create_mod("d", ["c:c"])
 
   var input = [
     mod_a,
@@ -101,17 +101,15 @@ func test_ResolveLoadOrder_FailCircularDependency() -> void:
   assertTrue(output is Mods.LoadError)
   assertEquals(output.reason, Mods.LoadError.Reason.DEPENDENCY_RESOLUTION_FAILURE)
 
-func test_ResolveLoadOrder_FailDuplicateTags() -> void:
+func test_ResolveLoadOrder_FailDuplicateMods() -> void:
   var mod_a = create_mod("a", [])
-  mod_a.tags = ["the_tag"]
-  var mod_b = create_mod("b", [])
-  mod_b.tags = ["the_tag"]
+  var other_mod_a = create_mod("a", [])
 
   var input = [
     mod_a,
-    mod_b
+    other_mod_a
   ]
 
   var output = Mods._resolve_load_order(input)
   assertTrue(output is Mods.LoadError)
-  assertEquals(output.reason, Mods.LoadError.Reason.DUPLICATE_TAGS)
+  assertEquals(output.reason, Mods.LoadError.Reason.DUPLICATE_MODS)
