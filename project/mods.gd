@@ -133,7 +133,7 @@ static func _resolve_load_order(metadata: Array) -> Variant:
   # Verify that no two mods use the same id.
   for i in range(len(metadata)):
     for j in range(i+1, len(metadata)):
-      if metadata[i].name == metadata[j].name:
+      if metadata[i].id == metadata[j].id:
         return LoadError.new(LoadError.Reason.DUPLICATE_MODS, metadata[i].name)
 
   # Initialize a dictionary for keeping track of which mod tags have
