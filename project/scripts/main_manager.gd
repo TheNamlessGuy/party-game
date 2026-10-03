@@ -14,6 +14,7 @@ func _on_minigame_finished() -> void:
   party_game_manager.resume_party_game()
 
 func _ready() -> void:
+  Mods.load_all()
   party_game_manager.start_minigame.connect(_on_start_minigame)
   minigame_manager.minigame_finished.connect(_on_minigame_finished)
   party_game_manager.load_party_game()
