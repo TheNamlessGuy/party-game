@@ -1,20 +1,26 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 extends SceneTree
 
 func _init() -> void:
+  _ready.call_deferred()
+
+func _ready() -> void:
   var args = _parse_args()
   if args == null:
-    quit(0)
+    _teardown(0)
     return
 
   var tests = _get_tests(args)
-
   for test in tests:
     var instance = test['loaded_class'].new()
+    root.add_child(instance)
     for testcase in test['cases']:
       prints("Running", test['class']['class'] + '::' + testcase['method']['name'])
       Callable(instance, testcase['method']['name']).call()
+    root.remove_child(instance)
+    instance.queue_free()
 
-  quit(0)
+  _teardown(0)
 
 func _parse_args():
   var retval = {
@@ -91,3 +97,6 @@ func _method_matches_filters(clazz, method, filters) -> bool:
       return filter[1] == method['name']
 
   return false
+
+func _teardown(exitcode: int) -> void:
+  quit(exitcode)
